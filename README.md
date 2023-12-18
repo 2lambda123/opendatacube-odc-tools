@@ -4,167 +4,74 @@
 DEA Prototype Code
 ==================
 
-- AWS s3 tools
-- Rasterio from S3 investigations
+This repository provides developmental [libraries](https://github.com/opendatacube/odc-tools/tree/develop/libs)
+and [CLI tools](https://github.com/opendatacube/odc-tools/tree/develop/apps) for Open Datacube.
+
+- AWS S3 tools
+- CLIs for using ODC data from AWS S3 and SQS 
 - Utilities for data visualizations in notebooks
-
-Installation
-============
-
-This repository provides a number of small [libraries](https://github.com/opendatacube/odc-tools/tree/develop/libs)
-and [CLI tools](https://github.com/opendatacube/odc-tools/tree/develop/apps).
+- Experiments on optimising Rasterio usage on AWS S3 
 
 Full list of libraries, and install instructions:
 
-- `odc.algo` algorithms (GeoMedian wrapper is here)
-- `odc.stats` large scale processing framework (Moved to [odc-stats](http://github.com/opendatacube/odc-stats))
 - `odc.ui` tools for data visualization in notebook/lab
-- `odc.stac` STAC to ODC conversion tools (Moved to [odc-stac](https://github.com/opendatacube/odc-stac))
-- `odc.dscache` experimental key-value store where `key=UUID`, `value=Dataset` (moved to [odc-dscache](https://github.com/opendatacube/odc-dscache))
 - `odc.io` common IO utilities, used by apps mainly
 - `odc-cloud[ASYNC,AZURE,THREDDS]` cloud crawling support package
   - `odc.aws` AWS/S3 utilities, used by apps mainly
   - `odc.aio` faster concurrent fetching from S3 with async, used by apps `odc-cloud[ASYNC]`
   - `odc.{thredds,azure}` internal libs for cloud IO `odc-cloud[THREDDS,AZURE]`
 
-Pre-release of these libraries is on PyPI now, so can be installed with `pip`
-"the normal way". Most recent development versions of `odc-tools` packages are
-pushed to `https://packages.dea.ga.gov.au`, and can be installed like so:
+## Promoted to their own repositories 
+- `odc.stats` large scale processing framework (Moved to [odc-stats](http://github.com/opendatacube/odc-stats))
+- `odc.stac` STAC to ODC conversion tools (Moved to [odc-stac](https://github.com/opendatacube/odc-stac))
+- `odc.dscache` experimental key-value store where `key=UUID`, `value=Dataset` (moved to [odc-dscache](https://github.com/opendatacube/odc-dscache))
+
+Installation
+============
+
+Libraries and applications in this repository are published to PyPI, and can be installed \
+with `pip` like so:
 
 ```
-pip install --extra-index-url="https://packages.dea.ga.gov.au" \
+pip install \
   odc-ui \
   odc-stac \
   odc-stats \
-  odc-algo \
   odc-io \
   odc-cloud[ASYNC] \
   odc-dscache
 ```
 
-**NOTE**: on Ubuntu 18.04 the default `pip` version is awfully old and does not
-support `--extra-index-url` command line option, so make sure to upgrade `pip`
-first: `pip3 install --upgrade pip`.
-
 For Conda Users
 ---------------
 
-Currently there are no `odc-tools` conda packages. But majority of `odc-tools`
-dependencies can be installed with conda from `conda-forge` channel.
+Some **odc-tools** are available via `conda` from the `conda-forge` channel.
 
-Use `conda env update -f <file>` to install all needed dependencies for
-`odc-tools` libraries and apps.
 
-<details><summary>Conda `environment.yaml` (click to expand)</summary><div markdown="1">
-
-```yaml
-channels:
-  - conda-forge
-dependencies:
-  # Datacube
-  - datacube>=1.8.5
-
-  # odc.dscache
-  - python-lmdb
-  - zstandard
-
-  # odc.algo
-  - dask-image
-  - numexpr
-  - scikit-image
-  - scipy
-  - toolz
-
-  # odc.ui
-  - ipywidgets
-  - ipyleaflet
-  - tqdm
-
-  # odc-apps-dc-tools
-  - pystac>=1
-  - pystac-client>=0.2.0
-  - azure-storage-blob
-  - fsspec
-  - lxml  # needed for thredds-crawler
-
-  # odc.{aio,aws}: aiobotocore/boto3
-  #  pin aiobotocore for easier resolution of dependencies
-  - aiobotocore==1.3.3
-  - boto3
-
-  # eodatasets3 (used by odc-stats)
-  - boltons
-  - ciso8601
-  - python-rapidjson
-  - requests-cache
-  - ruamel.yaml
-  - structlog
-  - url-normalize
-
-  # for dev
-  - pylint
-  - autopep8
-  - flake8
-  - isort
-  - black
-  - mypy
-
-  # For tests
-  - pytest
-  - pytest-httpserver
-  - pytest-cov
-  - pytest-timeout
-  - moto
-  - deepdiff
-
-  - pip>=20
-  - pip:
-      # odc.apps.dc-tools
-      - thredds-crawler
-
-      # odc.stats
-      - eodatasets3
-
-      # tests
-      - pytest-depends
-
-      # odc.ui
-      - jupyter-ui-poll
-
-      # odc-tools libs
-      - odc-stac
-      - odc-algo
-      - odc-ui
-      - odc-dscache
-      - odc-stats
-
-      # odc-tools CLI apps
-      - odc-apps-cloud
-      - odc-apps-dc-tools
 ```
-</div></details>
+conda install -c conda-forge odc-apps-dc-tools odc-io odc-cloud 
 
-CLI Tools
-=========
+```
+
+
+Cloud Tools
+===========
 
 Installation
 ------------
 
-Cloud tools depend on `aiobotocore` package which has a dependency on a specific
-version of `botocore`. Another package we use, `boto3`, also depends on a
-specific version of `botocore`. As a result having both `aiobotocore` and
-`boto3` in one environment can be a bit tricky. The easiest way to solve this,
-is to install `aiobotocore[awscli,boto3]` before anything else, which will pull
-in a compatible version of `boto3` and `awscli` into the environment.
+Cloud tools depend on the `aiobotocore` package, which depends on specific
+versions of `botocore`. Another package we use, `boto3`, also depends on
+specific versions of `botocore`. As a result, having both `aiobotocore` and
+`boto3` in one environment can be a bit tricky. The way to solve this
+is to install `aiobotocore[awscli,boto3]` before anything else, which will install
+compatible versions of `boto3` and `awscli` into the environment.
 
 ```
 pip install -U "aiobotocore[awscli,boto3]==1.3.3"
 # OR for conda setups
 conda install "aiobotocore==1.3.3" boto3 awscli
 ```
-
-The specific version of `aiobotocore` is not relevant, but it is needed in
-practice to limit `pip`/`conda` package resolution search.
 
 
 1. For cloud (AWS only)
@@ -228,15 +135,15 @@ dc-index-from-tar --protocol gs --env mangroves --ignore-lineage metadata.tar.gz
 Local Development
 =================
 
-The following steps is used in github workflow `main.yml`
+The following steps are used in the GitHub Actions workflow `main.yml`
 
 ```bash
 
 # build environment from file
-mamba env create -f tests/test-env-py38.yml
+mamba env create -f tests/test-env.yml
 
-# this environment name is defined in tests/test-env-py38.yml file
-conda activate odc-tests-py38
+# this environment name is defined in tests/test-env.yml file
+conda activate odc-tools-tests
 
 # install additional packages
 ./scripts/dev-install.sh --no-deps
@@ -253,29 +160,106 @@ pytest --cov=. \
 libs apps
 
 # Optional, to delete the environment
-conda env remove -n odc-tests-py38
+conda env remove -n odc-tools-tests
 ```
+
+Use `conda env update -f <file>` to install all needed dependencies for
+`odc-tools` libraries and apps.
+
+<details><summary>Conda `environment.yaml` (click to expand)</summary><div markdown="1">
+
+```yaml
+channels:
+  - conda-forge
+dependencies:
+  # Datacube
+  - datacube>=1.8.5
+
+  # odc.dscache
+  - python-lmdb
+  - zstandard
+
+  # odc.ui
+  - ipywidgets
+  - ipyleaflet
+  - tqdm
+
+  # odc-apps-dc-tools
+  - pystac>=1
+  - pystac-client>=0.2.0
+  - azure-storage-blob
+  - fsspec
+  - lxml  # needed for thredds-crawler
+
+  # odc.{aio,aws}: aiobotocore/boto3
+  #  pin aiobotocore for easier resolution of dependencies
+  - aiobotocore==1.3.3
+  - boto3
+
+  # eodatasets3 (used by odc-stats)
+  - boltons
+  - ciso8601
+  - python-rapidjson
+  - requests-cache
+  - ruamel.yaml
+  - structlog
+  - url-normalize
+
+  # for dev
+  - pylint
+  - autopep8
+  - flake8
+  - isort
+  - black
+  - mypy
+
+  # For tests
+  - pytest
+  - pytest-httpserver
+  - pytest-cov
+  - pytest-timeout
+  - moto
+  - deepdiff
+
+  - pip>=20
+  - pip:
+      # odc.apps.dc-tools
+      - thredds-crawler
+
+      # odc.stats
+      - eodatasets3
+
+      # tests
+      - pytest-depends
+
+      # odc.ui
+      - jupyter-ui-poll
+
+      # odc-tools libs
+      - odc-stac
+      - odc-ui
+      - odc-dscache
+      - odc-stats
+
+      # odc-tools CLI apps
+      - odc-apps-cloud
+      - odc-apps-dc-tools
+```
+</div></details>
 
 Release Process
 ===============
 
-Development versions of packages are pushed to [DEA packages
-repo](https://packages.dea.ga.gov.au/) on every push to `develop` branch,
-version is automatically increased by a script that runs before creating wheels
-and source distribution tar balls. Right now new dev version is pushed for all
-the packages even the ones that have not changed since last push.
-
-Publishing to [PyPi](https://pypi.org/) happens automatically when changes are
-pushed to a protected `pypi/publish` branch. Only members of [Open Datacube
-Admins](https://github.com/orgs/opendatacube/teams/admins) group have the
-permission to push to this branch.
-
-Process:
-
 1. Manually edit `{lib,app}/{pkg}/odc/{pkg}/_version.py` file to increase version number
-2. Merge it to `develop` branch via PR
-3. Fast forward `pypi/publish` branch to match `develop`
-4. Push it to GitHub
+2. Merge changes to the `develop` branch via a Pull Request
+3. Fast-forward the `pypi/publish` branch to match `develop`
+4. Push to GitHub
 
 Steps 3 and 4 can be done by an authorized user with
 `./scripts/sync-publish-branch.sh` script.
+
+
+Publishing to [PyPi](https://pypi.org/) happens automatically when changes are
+pushed to the protected `pypi/publish` branch. Only members of [Open Datacube
+Admins](https://github.com/orgs/opendatacube/teams/admins) group have the
+permission to push to this branch.

@@ -403,9 +403,11 @@ class Product(VirtualProduct):
 
     def _reconstruct(self):
         return {
-            key: value
-            if key not in ["fuse_func", "dataset_predicate"]
-            else qualified_name(value)
+            key: (
+                value
+                if key not in ["fuse_func", "dataset_predicate"]
+                else qualified_name(value)
+            )
             for key, value in self.items()
         }
 

@@ -1,6 +1,7 @@
 """
 Tools for STAC to EO3 translation
 """
+
 import math
 import numpy
 from eodatasets3.serialise import from_doc

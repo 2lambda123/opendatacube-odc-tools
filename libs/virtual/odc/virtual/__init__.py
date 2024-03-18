@@ -75,9 +75,11 @@ class NameResolver:
             func_keys = ["fuse_func", "dataset_predicate"]
             return from_validated_recipe(
                 {
-                    key: value
-                    if key not in func_keys
-                    else lookup(value, kind="function")
+                    key: (
+                        value
+                        if key not in func_keys
+                        else lookup(value, kind="function")
+                    )
                     for key, value in recipe.items()
                 }
             )
